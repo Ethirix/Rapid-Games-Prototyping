@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class GravityField : MonoBehaviour
@@ -29,6 +28,10 @@ public class GravityField : MonoBehaviour
         UpdateColor();
     }
 
+    /// <summary>
+    /// Calculates the Force that will be applied to a <c>Rigidbody</c>
+    /// </summary>
+    /// <returns>The calculated force</returns>
     private float GetForce()
     {
         float force = forceToApply;
@@ -40,24 +43,22 @@ public class GravityField : MonoBehaviour
         return force;
     }
 
+    /// <summary>
+    /// Changes the Color of the GravityField based on force Calculated in <c>GetForce()</c>
+    /// </summary>
     private void UpdateColor()
     {
         float force = GetForce();
         force -= Math.Abs(Physics.gravity.y);
-       
-        switch (force)
-        {
-            case > 0:
-                gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", UpwardForceColor);
-                break;
-            case < 0:
-                gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", DownwardForceColor);
-                break;
-            default:
-                gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", NeutralForceColor);
-                break;
-        }
 
+        Color color = force switch
+        {
+            > 0 => UpwardForceColor,
+            < 0 => DownwardForceColor,
+            _ => NeutralForceColor
+        };
+
+        gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", color);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -70,6 +71,7 @@ public class GravityField : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        //Finds the index of the matching GravityCollection.GameObject to then remove it from the List
         _gameObjectsInTrigger.RemoveAt(_gameObjectsInTrigger.FindIndex(gc => gc.GameObject == other.gameObject));
     }
 
@@ -85,6 +87,9 @@ public class GravityField : MonoBehaviour
         StartCoroutine(RunGravityField());
     }
 
+    /// <summary>
+    /// Applies the Force to all <c>GameObjects</c> within the Gravity Field
+    /// </summary>
     private IEnumerator RunGravityField()
     {
         float force = 0.0f;
@@ -94,17 +99,26 @@ public class GravityField : MonoBehaviour
         }
         force += forceToApply;
 
+        //Uses List.ForEach to apply the force to each Rigidbody
         _gameObjectsInTrigger.ForEach(gravityCollection => gravityCollection.Rigidbody.AddForce(new Vector3(0, force, 0), ForceMode.Acceleration));
 
         yield break;
     }
 }
 
+/// <summary>
+/// Holds references to a <c>GameObject</c> and <c>Rigidbody</c> to avoid many <c>GetComponent()</c> calls
+/// </summary>
 internal class GravityCollection
 {
     public readonly GameObject GameObject;
     public readonly Rigidbody Rigidbody;
 
+    /// <summary>
+    /// Constructs the <c>GravityCollection</c> Object
+    /// </summary>
+    /// <param name="go"><c>GameObject</c> reference</param>
+    /// <param name="rb"><c>Rigidbody</c> reference to reduce <c>GetComponent</c> calls</param>
     public GravityCollection(GameObject go, Rigidbody rb)
     {
         GameObject = go;
