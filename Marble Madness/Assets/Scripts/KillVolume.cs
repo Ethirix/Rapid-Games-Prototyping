@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class KillVolume : MonoBehaviour
 {    
@@ -8,7 +9,7 @@ public class KillVolume : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == playerTag)
+        if (other.CompareTag(playerTag))
         {
             PlayerController playerController = other.GetComponent<PlayerController>();
 

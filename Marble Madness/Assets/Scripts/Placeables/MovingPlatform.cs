@@ -35,6 +35,8 @@ public class MovingPlatform : MonoBehaviour
     {
         float currentTime = 0f;
 
+        yield return new WaitForSeconds(waitTime);
+
         while(active)
         {
             while(currentTime < time)
