@@ -1,4 +1,7 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GravityField : MonoBehaviour
@@ -17,7 +20,7 @@ public class GravityField : MonoBehaviour
     [SerializeField, Tooltip("Neutral Force means anything that is equal to Gravity")] 
     private Color NeutralForceColor;
 
-    private readonly List<GravityCollection> gameObjectsInTrigger = new();
+    private readonly List<GravityCollection> _gameObjectsInTrigger = new();
     private float _oldForce;
 
     private void Start()
@@ -40,67 +43,67 @@ public class GravityField : MonoBehaviour
     private void UpdateColor()
     {
         float force = GetForce();
-        force += Physics.gravity.y;
+        force -= Math.Abs(Physics.gravity.y);
        
-        if (force > 0)
+        switch (force)
         {
-            gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", UpwardForceColor);
+            case > 0:
+                gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", UpwardForceColor);
+                break;
+            case < 0:
+                gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", DownwardForceColor);
+                break;
+            default:
+                gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", NeutralForceColor);
+                break;
         }
-        else if (force < 0)
-        {
-            gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", DownwardForceColor);
-        }
-        else
-        {
-            gameObject.GetComponent<Renderer>().material.SetColor("_EmissiveColor", NeutralForceColor);
-        }
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<Rigidbody>() is not null)
         {
-            gameObjectsInTrigger.Add(new GravityCollection(other.gameObject, other.GetComponent<Rigidbody>()));
+            _gameObjectsInTrigger.Add(new GravityCollection(other.gameObject, other.GetComponent<Rigidbody>()));
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        for (int i = 0; i < gameObjectsInTrigger.Count; i++)
-        {
-            if (gameObjectsInTrigger[i].GameObject == other.gameObject)
-            {
-                gameObjectsInTrigger.RemoveAt(i);
-            }
-        }
+        _gameObjectsInTrigger.RemoveAt(_gameObjectsInTrigger.FindIndex(gc => gc.GameObject == other.gameObject));
     }
 
     private void FixedUpdate()
     {
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (GetForce() != _oldForce)
         {
             _oldForce = GetForce();
             UpdateColor();
         }
 
-        foreach (GravityCollection gc in gameObjectsInTrigger)
-        {
-            float force = 0.0f;
-            if (normalizeGravity)
-            {
-                force -= Physics.gravity.y;
-            }
-            force += forceToApply;
+        StartCoroutine(RunGravityField());
+    }
 
-            gc.Rigidbody.AddForce(new Vector3(0, force, 0), ForceMode.Acceleration);
+    private IEnumerator RunGravityField()
+    {
+        float force = 0.0f;
+        if (normalizeGravity)
+        {
+            force += Math.Abs(Physics.gravity.y);
         }
+        force += forceToApply;
+
+        _gameObjectsInTrigger.ForEach(gravityCollection => gravityCollection.Rigidbody.AddForce(new Vector3(0, force, 0), ForceMode.Acceleration));
+
+        yield break;
     }
 }
 
-class GravityCollection
+internal class GravityCollection
 {
-    public GameObject GameObject;
-    public Rigidbody Rigidbody;
+    public readonly GameObject GameObject;
+    public readonly Rigidbody Rigidbody;
 
     public GravityCollection(GameObject go, Rigidbody rb)
     {
