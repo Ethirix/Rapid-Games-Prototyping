@@ -3,43 +3,40 @@ using UnityEngine;
 public class ExtendMap : MonoBehaviour
 {
     [SerializeField] private GameObject mapPrefab;
+    [SerializeField] private float beyondViewRenderDistance;
 
-    private Camera camera;
-    private Resolution resolution;
-    private Collider2D collider;
-    private Bounds bounds;
+    private Camera _mainCamera;
+    private Collider2D _collider;
+    private Resolution _resolution;
+    private Bounds _bounds;
 
     private bool ranSpawn;
 
     private void Awake()
     {
-        camera = Camera.main;
-        resolution = Screen.currentResolution;
-        collider = GetComponent<Collider2D>();
+        _mainCamera = Camera.main;
+        _resolution.width = Screen.width;
+        _resolution.height = Screen.height;
+        _collider = GetComponent<Collider2D>();
 
-        bounds = collider.bounds;
+        _bounds = _collider.bounds;
     }
 
     private void FixedUpdate()
     {
+        Vector3 topPos = _mainCamera.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + _bounds.extents.y - beyondViewRenderDistance), Camera.MonoOrStereoscopicEye.Mono);
+        Vector3 bottomPos = _mainCamera.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y - _bounds.extents.y + beyondViewRenderDistance), Camera.MonoOrStereoscopicEye.Mono);
 
-        Vector3 pos = camera.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + bounds.extents.y + 1), Camera.MonoOrStereoscopicEye.Mono);
-        
-
-        if (pos.y - resolution.height < 10 && !ranSpawn)
+        if (_resolution.height - topPos.y > 0 && !ranSpawn)
         {
             ranSpawn = true;
-            GameObject map = Instantiate(mapPrefab);
-            map.transform.parent = GameObject.Find("Background").transform;
-            map.transform.position = new Vector3(transform.position.x, transform.position.y + bounds.extents.y);
+            GameObject map = Instantiate(mapPrefab, GameObject.Find("Background").transform);
+            map.transform.position = new Vector3(transform.position.x, transform.position.y + _bounds.extents.y * 2);
         }
 
-        //if (pos.y > resolution.height && !ranSpawn)
-        //{
-        //    ranSpawn = true;
-        //    GameObject map = Instantiate(mapPrefab);
-        //    map.transform.parent = GameObject.Find("Background").transform;
-        //    map.transform.position = new Vector3(transform.position.x, transform.position.y + bounds.extents.y);
-        //}
+        if (_resolution.height - bottomPos.y > _resolution.height * ((float)_resolution.width / _resolution.height))
+        {
+            Destroy(gameObject);
+        }
     }
 }
