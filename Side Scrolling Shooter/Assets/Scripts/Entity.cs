@@ -9,9 +9,20 @@ public class Entity : MonoBehaviour
 
     protected virtual void Start()
     {
-        tag = "Enemy";
         _health = GetComponent<Health>();
+        _health.HealthInitialized += OnHealthComponentInitialized;
         DamageTaken += _health.DealDamage;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        DamageTaken -= _health.DealDamage;
+    }
+
+    private void OnHealthComponentInitialized(object _, EventArgs __)
+    {
+        _health.HealthBarPrefab.transform.localPosition = new Vector3(0, GetComponent<PolygonCollider2D>().bounds.extents.y + 0.25f, 0);
+        _health.HealthInitialized -= OnHealthComponentInitialized;
     }
 
     protected virtual void OnCollisionEnter2D(Collision2D collision)

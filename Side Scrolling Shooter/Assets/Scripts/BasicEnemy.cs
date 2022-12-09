@@ -2,5 +2,10 @@ using UnityEngine;
 
 public class BasicEnemy : Entity
 {
-    [SerializeField] private readonly GameObject projectilePrefab;
+    [SerializeField] private GameObject projectilePrefab;
+
+    private void FixedUpdate()
+    {
+
+    }
 }
