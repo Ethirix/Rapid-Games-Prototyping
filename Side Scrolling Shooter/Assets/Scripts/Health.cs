@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class Health : MonoBehaviour
 {
@@ -11,9 +10,11 @@ public class Health : MonoBehaviour
     private RectTransform _healthBar;
     private float _healthBarWidth;
 
+    public int CurrentHealth { get; private set; }
     public GameObject HealthBarPrefab { get; private set; }
+    public bool IsInitialized { get; private set; } = false;
 
-    public event EventHandler HealthInitialized;
+    public EventHandler HealthChanged;
 
     private void Start()
     {
@@ -21,21 +22,24 @@ public class Health : MonoBehaviour
         HealthBarPrefab.name = "Healthbar";
 
         _maxHealth = health;
+        CurrentHealth = health;
         _healthBar = transform.Find("Healthbar/HealthbarContainer/Background/Health").gameObject.GetComponent<RectTransform>();
         _healthBarWidth = _healthBar.sizeDelta.x;
 
-        HealthInitialized?.Invoke(this, null);
+        IsInitialized = true;
     }
     
     public void DealDamage(int dmg)
     {
-        health -= dmg;
-        _healthBar.sizeDelta = new Vector2(_healthBarWidth * health / _maxHealth, _healthBar.sizeDelta.y);
+        CurrentHealth -= dmg;
+        _healthBar.sizeDelta = new Vector2(_healthBarWidth * CurrentHealth / _maxHealth, _healthBar.sizeDelta.y);
+        HealthChanged?.Invoke(this, null);
     }
 
     public void DealDamage(object _, int dmg)
     {
-        health -= dmg;
-        _healthBar.sizeDelta = new Vector2(_healthBarWidth * health / _maxHealth, _healthBar.sizeDelta.y);
+        CurrentHealth -= dmg;
+        _healthBar.sizeDelta = new Vector2(_healthBarWidth * CurrentHealth / _maxHealth, _healthBar.sizeDelta.y);
+        HealthChanged?.Invoke(this, null);
     }
 }

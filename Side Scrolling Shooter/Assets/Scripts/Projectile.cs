@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -6,7 +7,6 @@ public class Projectile : MonoBehaviour
 {
     [Header("Projectile Settings")]
     [SerializeField] private int damage;
-    [SerializeField] private float cooldown;
     [SerializeField] private float speed;
 
     [Header("Object Settings")]
@@ -47,12 +47,9 @@ public class Projectile : MonoBehaviour
     {
         Destroy(gameObject);
     }
-}
 
-public enum Direction
-{
-    PosY,
-    PosX,
-    NegY,
-    NegX
+    private void FixedUpdate()
+    {
+        transform.Translate(new Vector3(0, speed * Time.fixedDeltaTime), Space.Self);
+    }
 }
