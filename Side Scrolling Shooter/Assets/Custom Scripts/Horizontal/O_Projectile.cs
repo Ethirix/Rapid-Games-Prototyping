@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
-public class Projectile : MonoBehaviour 
+[Obsolete]
+public class O_Projectile : MonoBehaviour 
 {
 	public float speed;
 						

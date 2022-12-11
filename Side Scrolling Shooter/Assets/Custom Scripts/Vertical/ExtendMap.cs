@@ -25,7 +25,7 @@ public class ExtendMap : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 topPos = _mainCamera.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + _bounds.extents.y - beyondViewRenderDistance), Camera.MonoOrStereoscopicEye.Mono);
-        Vector3 bottomPos = _mainCamera.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y - _bounds.extents.y + beyondViewRenderDistance), Camera.MonoOrStereoscopicEye.Mono);
+        Vector3 bottomPos = _mainCamera.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + _bounds.extents.y + beyondViewRenderDistance), Camera.MonoOrStereoscopicEye.Mono);
 
         if (_resolution.height - topPos.y > 0 && !ranSpawn)
         {
@@ -34,7 +34,7 @@ public class ExtendMap : MonoBehaviour
             map.transform.position = new Vector3(transform.position.x, transform.position.y + _bounds.extents.y * 2);
         }
 
-        if (_resolution.height - bottomPos.y > _resolution.height * ((float)_resolution.width / _resolution.height))
+        if (_resolution.height - bottomPos.y > _resolution.height)
         {
             Destroy(gameObject);
         }
