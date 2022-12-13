@@ -5,23 +5,45 @@ using System.Linq;
 public class BasicEnemy : Entity
 {
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float sideToSideWidth = 5;
+    [SerializeField] private float sideToSideWidth = 0;
     [SerializeField] private float sidewaysMovementForce = 15;
     [SerializeField] private float forwardMovementForce = 10;
     [SerializeField] private float detectionRange = 10;
+    [SerializeField] private int score = 50;
     
     private int _direction = 1;
 
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        gameManager.EnemyDead?.Invoke(this, score);
+    }
+
+    protected override void OnCollisionEnter2D(Collision2D collision)
+    {
+        base.OnCollisionEnter2D(collision);
+
+        if (collision.gameObject.CompareTag("Projectile"))
+        {
+            gameManager.EnemyHit?.Invoke(this, null);
+        }
+    }
+
     protected override void MovementLogic()
     {
+
         if (transform.position.x < -sideToSideWidth)
         {
             _direction = 1;
         }
-
-        if (transform.position.x > sideToSideWidth)
-        {
+        else if (transform.position.x > sideToSideWidth)
+        { 
             _direction = -1;
+        }
+
+        if (sideToSideWidth == 0)
+        {
+            _direction = 0;
         }
 
         rigidbody2D.AddRelativeForce(new Vector2(sidewaysMovementForce * _direction, -forwardMovementForce));

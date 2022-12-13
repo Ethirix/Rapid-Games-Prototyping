@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,9 +5,8 @@ using UnityEngine;
 public class PlayerController : Entity
 {
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float movementForce;
-    [SerializeField] private float maxSpeed;
-    [SerializeField] private float cooldown = 0.5f;
+    [SerializeField] private float movementForce = 350f;
+    [SerializeField] private float maxSpeed = 10f;
 
     private float _horizontalInput;
     private float _verticalInput;
@@ -44,7 +42,7 @@ public class PlayerController : Entity
 
         if (Mathf.Abs(rigidbody2D.velocity.sqrMagnitude) > maxSpeed * maxSpeed)
         {
-            rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity, maxSpeed);
+            rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity, maxSpeed); //DOA
         }
     }
 

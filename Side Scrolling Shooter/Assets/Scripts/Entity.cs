@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Health), typeof(PolygonCollider2D))]
+[RequireComponent(typeof(Health), typeof(PolygonCollider2D), typeof(Rigidbody2D))]
 public class Entity : MonoBehaviour
 {
     public event EventHandler<int> DamageTaken;
@@ -12,13 +12,16 @@ public class Entity : MonoBehaviour
     protected Health health;
     protected Rigidbody2D rigidbody2D;
     protected readonly List<FiringPoint> firingPoints = new();
+    protected GameManager gameManager;
     
     protected virtual void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
+        rigidbody2D.freezeRotation = true;
         health = GetComponent<Health>();
         DamageTaken += health.DealDamage;
         health.HealthChanged += OnHealthChanged;
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         StartCoroutine(WaitForHealthComponentInitialization());
 
         foreach (Transform t in gameObject.GetComponentsInChildren<Transform>())
@@ -68,7 +71,11 @@ public class Entity : MonoBehaviour
         {
             if (health.IsInitialized)
             {
-                health.HealthBarPrefab.transform.localPosition = transform.TransformDirection(new Vector3(0, -GetComponent<PolygonCollider2D>().bounds.extents.y - 0.25f, 0));
+                Vector3 localScale = transform.localScale;
+                Vector3 healthScale = health.HealthBarPrefab.transform.localScale;
+                health.HealthBarPrefab.transform.localPosition = transform.TransformDirection(new Vector3(0, -GetComponent<PolygonCollider2D>().bounds.extents.y / localScale.y - 0.25f, 0));
+                health.HealthBarPrefab.transform.localScale = new Vector3(healthScale.x / localScale.x,
+                    healthScale.y / localScale.y, healthScale.z / localScale.z);
                 yield break;
             }
 
