@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     [Header("Jump Settings")]
     [SerializeField, Range(1, 10)]
     private int maximumJumpCount;
+    [SerializeField] 
+    private float jumpForce;
 
     [Header("Floor Detection Settings")]
     [SerializeField]
@@ -20,7 +22,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     [SerializeField, Tooltip("From the base of the sprite, in World units, the starting position of the Raycast for the floor.")] 
     private float raycastStartPosition;
 
-    private int _jumpCount = 0;
+    private int _jumpCount;
 
     private Collider2D _collider;
     private Bounds _bounds;
@@ -48,16 +50,20 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
 
     public void OnMovement(InputAction.CallbackContext context)
     {
-        //movement
         _movementFloat = context.ReadValue<float>();
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        //jump
-        if (IsGrounded())
+        if (IsGrounded() && context.performed)
         {
-            _rigidbody.AddRelativeForce(Vector2.up * 250f, ForceMode2D.Impulse);
+            _rigidbody.AddRelativeForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            _jumpCount++;
+        }
+        else if (!IsGrounded() && _jumpCount > 0 && _jumpCount < maximumJumpCount && context.performed)
+        {
+            _rigidbody.AddRelativeForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            _jumpCount++;
         }
     }
 
@@ -75,15 +81,27 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
             {
                 _rigidbody.AddForce(new Vector2(-force / 2, 0));
             }
-            
             if (_rigidbody.velocity.x < -0.1f)
             {
                 _rigidbody.AddForce(new Vector2(force / 2, 0));
             }
-            if (_rigidbody.velocity.x > -0.1f && _rigidbody.velocity.x < 0.1f)
+            if (_rigidbody.velocity.x is > -0.1f and < 0.1f)
             {
                 _rigidbody.velocity.Set(0, _rigidbody.velocity.y);
             }
+        }
+
+        if (_rigidbody.velocity.x >= maxMovementSpeed)
+        {
+            _rigidbody.velocity = new Vector2(maxMovementSpeed, _rigidbody.velocity.y);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        if (IsGrounded())
+        {
+            _jumpCount = 0;
         }
     }
 
