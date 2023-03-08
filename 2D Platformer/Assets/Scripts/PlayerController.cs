@@ -48,6 +48,8 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         _controls.game.Enable();
     }
 
+
+
     public void OnMovement(InputAction.CallbackContext context)
     {
         _movementFloat = context.ReadValue<float>();
@@ -62,6 +64,9 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         }
         else if (!IsGrounded() && _jumpCount > 0 && _jumpCount < maximumJumpCount && context.performed)
         {
+            //_rigidbody.velocity.Set(_rigidbody.velocity.x, 0);
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
+
             _rigidbody.AddRelativeForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             _jumpCount++;
         }
@@ -95,6 +100,11 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         {
             _rigidbody.velocity = new Vector2(maxMovementSpeed, _rigidbody.velocity.y);
         }
+
+        _rigidbody.AddForce(
+            _rigidbody.velocity.y < 0
+                ? new Vector2(0, Physics.gravity.y * 10f)
+                : new Vector2(0, Physics.gravity.y * 3f), ForceMode2D.Impulse);
     }
 
     private void OnCollisionEnter2D(Collision2D col)

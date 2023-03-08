@@ -1087,6 +1087,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1389462634}
+  - {fileID: 1867142346}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1103,10 +1104,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMovementSpeed: 6
-  acceleration: 350
+  acceleration: 100
   maximumJumpCount: 4
-  jumpForce: 1500
-  raycastDistance: 0.01
+  jumpForce: 1000
+  raycastDistance: 0.05
   raycastStartPosition: 0.01
 --- !u!1 &1590562251
 GameObject:
@@ -1205,5 +1206,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f273c169eaf2584a8a0dfe1f390de57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 1469176872}
-  maxDeviation: 1.5
+  target: {fileID: 1867142345}
+--- !u!1 &1867142345
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1867142346}
+  - component: {fileID: 1867142347}
+  m_Layer: 9
+  m_Name: CameraPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1867142346
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1867142345}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1469176875}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1867142347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1867142345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1f61b2f8fc37f54986f41fd12c457f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1469176872}
+  offsetBounds: {x: 1, y: 1}
+  offsetPerSecond: 2.5
+  delayToReturnToCentre: {x: 1, y: 1}
+  minimumVelocityForCameraMovement: {x: 1, y: 1}
+  returnToCentreSpeedPerSecond: 0.5
