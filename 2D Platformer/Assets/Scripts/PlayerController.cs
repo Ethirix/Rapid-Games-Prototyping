@@ -86,10 +86,12 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
             {
                 _rigidbody.AddForce(new Vector2(-force / 2, 0));
             }
+
             if (_rigidbody.velocity.x < -0.1f)
             {
                 _rigidbody.AddForce(new Vector2(force / 2, 0));
             }
+
             if (_rigidbody.velocity.x is > -0.1f and < 0.1f)
             {
                 _rigidbody.velocity.Set(0, _rigidbody.velocity.y);
@@ -105,6 +107,12 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
             _rigidbody.velocity.y < 0
                 ? new Vector2(0, Physics.gravity.y * 10f)
                 : new Vector2(0, Physics.gravity.y * 3f), ForceMode2D.Impulse);
+
+        IsGrounded(out RaycastHit2D raycastHit2D);
+        if (raycastHit2D)
+        {
+            Debug.DrawLine(transform.position - raycastHit2D.collider.gameObject.transform.position, transform.position - new Vector3(raycastHit2D.normal.x, raycastHit2D.normal.y, 0), Color.green, Time.fixedDeltaTime);
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D col)
@@ -117,9 +125,21 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
 
     private bool IsGrounded()
     {
+        return _CheckGrounded();
+    }
+
+    private bool IsGrounded(out RaycastHit2D raycastHit2D)
+    {
+        raycastHit2D = _CheckGrounded();
+        return raycastHit2D;
+    }
+
+    private RaycastHit2D _CheckGrounded()
+    {
         Vector2 startPos = new(transform.position.x, transform.position.y - _bounds.extents.y + _collider.offset.y - raycastStartPosition);
         RaycastHit2D raycastHit2D = Physics2D.Raycast(startPos, Vector2.down, raycastDistance);
-        Debug.DrawRay(startPos, Vector3.down * raycastDistance, Color.red, Time.fixedDeltaTime);
+
+        Debug.DrawRay(startPos, 10f * raycastDistance * Vector3.down, Color.red, Time.fixedDeltaTime);
 
         return raycastHit2D;
     }
