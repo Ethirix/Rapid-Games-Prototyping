@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     private float maxMovementSpeed;
     [SerializeField]
     private float acceleration;
+    [SerializeField] 
+    private float slopeForce;
 
     [Header("Jump Settings")]
     [SerializeField, Range(1, 10)]
@@ -111,7 +113,8 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         IsGrounded(out RaycastHit2D raycastHit2D);
         if (raycastHit2D)
         {
-            Debug.DrawLine(transform.position - raycastHit2D.collider.gameObject.transform.position, transform.position - new Vector3(raycastHit2D.normal.x, raycastHit2D.normal.y, 0), Color.green, Time.fixedDeltaTime);
+            _rigidbody.AddForce(new Vector2(-raycastHit2D.normal.x, raycastHit2D.normal.y) * slopeForce, ForceMode2D.Force);
+            Debug.DrawLine(transform.position - raycastHit2D.collider.gameObject.transform.position, transform.position - new Vector3(-raycastHit2D.normal.x, raycastHit2D.normal.y, 0), Color.green, Time.fixedDeltaTime);
         }
     }
 

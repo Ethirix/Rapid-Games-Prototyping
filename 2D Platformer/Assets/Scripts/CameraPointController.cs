@@ -10,16 +10,28 @@ public class CameraPointController : MonoBehaviour
     private float offsetPerSecond = 1.5f;
     [SerializeField] 
     private Vector2 delayToReturnToCentre = new (1, 1);
-    [SerializeField]
+    [SerializeField, Space]
     private Vector2 minimumVelocityForCameraMovement = new (1, 1);
     [SerializeField]
     private float returnToCentreSpeedPerSecond = 0.5f;
+    [SerializeField, Space] 
+    private Vector2 cameraSizeBounds = new(7.5f, 15f);
+    [SerializeField] 
+    private float cameraSizeOffsetPerSecond = 1.0f;
+    [SerializeField] 
+    private float minimumVelocityForCameraSize = 1.0f;
+    [SerializeField] 
+    private float delayToRevertCameraSize = 1.0f;
+    [SerializeField] 
+    private float returnToDefaultCameraSizePerSecond = 1.0f;
+
 
 
     private Rigidbody2D _playerRigidbody2D;
 
     private float _timeSinceXChanged;
     private float _timeSinceYChanged;
+    private float _timeSinceCameraSizeChanged;
 
     private void Start()
     {
@@ -29,10 +41,11 @@ public class CameraPointController : MonoBehaviour
     private void Update()
     {
         Vector2 plrVelocity = _playerRigidbody2D.velocity;
-        Vector2 newPos = transform.localPosition;
+        Vector3 newPos = transform.localPosition;
 
         _timeSinceXChanged += Time.deltaTime;
         _timeSinceYChanged += Time.deltaTime;
+        _timeSinceCameraSizeChanged += Time.deltaTime;
 
         if (plrVelocity.x > minimumVelocityForCameraMovement.x)
         {
@@ -55,6 +68,13 @@ public class CameraPointController : MonoBehaviour
             _timeSinceYChanged = 0;
         }
 
+        if (plrVelocity.x > minimumVelocityForCameraSize || plrVelocity.x < -minimumVelocityForCameraSize ||
+            plrVelocity.y > minimumVelocityForCameraSize || plrVelocity.y < -minimumVelocityForCameraSize)
+        {
+            newPos.z += Mathf.Sin(cameraSizeOffsetPerSecond * Time.deltaTime) * cameraSizeBounds.y;
+            _timeSinceCameraSizeChanged = 0;
+        }
+
         if (newPos.x > offsetBounds.x)
         {
             newPos.x = offsetBounds.x;
@@ -70,6 +90,14 @@ public class CameraPointController : MonoBehaviour
         if (newPos.y < -offsetBounds.y)
         {
             newPos.y = -offsetBounds.y;
+        }
+        if (newPos.z > cameraSizeBounds.y)
+        {
+            newPos.z = cameraSizeBounds.y;
+        }
+        if (newPos.z < cameraSizeBounds.x)
+        {
+            newPos.z = cameraSizeBounds.x;
         }
 
         if (plrVelocity.x == 0)
@@ -98,6 +126,11 @@ public class CameraPointController : MonoBehaviour
             }
         }
 
-        transform.localPosition = new Vector3(newPos.x, newPos.y, -10);
+        if (plrVelocity.x == 0 && plrVelocity.y == 0 && _timeSinceCameraSizeChanged > delayToRevertCameraSize)
+        {
+            newPos.z -= Mathf.Sin(returnToDefaultCameraSizePerSecond * Time.deltaTime) * cameraSizeBounds.x;
+        }
+
+        transform.localPosition = newPos;
     }
 }
