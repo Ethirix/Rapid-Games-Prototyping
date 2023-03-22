@@ -1210,6 +1210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1389462634}
   - component: {fileID: 1389462635}
+  - component: {fileID: 1389462636}
   m_Layer: 9
   m_Name: CharacterSprite
   m_TagString: Untagged
@@ -1284,6 +1285,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1389462636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1389462633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d456a60f763ad24a856779a574b9656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbody: {fileID: 1469176874}
 --- !u!1 &1469176872
 GameObject:
   m_ObjectHideFlags: 0
@@ -1296,6 +1310,7 @@ GameObject:
   - component: {fileID: 1469176874}
   - component: {fileID: 1469176873}
   - component: {fileID: 1469176876}
+  - component: {fileID: 1469176877}
   m_Layer: 9
   m_Name: Character
   m_TagString: Untagged
@@ -1369,13 +1384,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acef6928eb1261044901e6d8ce72f1bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxMovementSpeed: 8
+  maxMovementSpeed: 12
   acceleration: 100
-  slopeForce: 300
-  maximumJumpCount: 4
+  slopeForce: 1000
+  dashForce: 1000
+  maximumDashCount: 1
+  maximumJumpCount: 1
   jumpForce: 1000
+  normalGravityModifier: 3
+  fallingGravityModifier: 10
   raycastDistance: 0.1
   raycastStartPosition: 0.01
+--- !u!95 &1469176877
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469176872}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f4067622f1954c44e85bde840c1d109a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1590562251
 GameObject:
   m_ObjectHideFlags: 0
@@ -1519,11 +1558,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1469176872}
-  offsetBounds: {x: 2.5, y: 2.5}
-  offsetPerSecond: 1
-  delayToReturnToCentre: {x: 1, y: 1}
+  offsetBounds: {x: 5.5, y: 3.5}
+  offsetPerSecond: 0.1
+  delayToReturnToCentre: {x: 0.25, y: 0.25}
   minimumVelocityForCameraMovement: {x: 1, y: 1}
-  returnToCentreSpeedPerSecond: 0.25
-  cameraSizeBounds: {x: 7.5, y: 15}
-  minimumSpeedForCameraSize: 1
-  delayToReveryCameraSize: 1
+  returnToCentreSpeedPerSecond: 0.1
+  cameraSizeBounds: {x: 7.5, y: 10}
+  cameraSizeOffsetPerSecond: 0.1
+  minimumVelocityForCameraSize: 1
+  delayToRevertCameraSize: 0.25
+  returnToDefaultCameraSizePerSecond: 0.1

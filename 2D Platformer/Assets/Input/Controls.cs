@@ -44,6 +44,15 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""dash"",
+                    ""type"": ""Button"",
+                    ""id"": ""4d1cadcc-006e-46e7-96aa-30da0d4ba02b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -123,6 +132,17 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""action"": ""jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9109f78e-b244-4a0b-bb32-96035d7c2f49"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -133,6 +153,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         m_game = asset.FindActionMap("game", throwIfNotFound: true);
         m_game_movement = m_game.FindAction("movement", throwIfNotFound: true);
         m_game_jump = m_game.FindAction("jump", throwIfNotFound: true);
+        m_game_dash = m_game.FindAction("dash", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -194,12 +215,14 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private IGameActions m_GameActionsCallbackInterface;
     private readonly InputAction m_game_movement;
     private readonly InputAction m_game_jump;
+    private readonly InputAction m_game_dash;
     public struct GameActions
     {
         private @Controls m_Wrapper;
         public GameActions(@Controls wrapper) { m_Wrapper = wrapper; }
         public InputAction @movement => m_Wrapper.m_game_movement;
         public InputAction @jump => m_Wrapper.m_game_jump;
+        public InputAction @dash => m_Wrapper.m_game_dash;
         public InputActionMap Get() { return m_Wrapper.m_game; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -215,6 +238,9 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @jump.started -= m_Wrapper.m_GameActionsCallbackInterface.OnJump;
                 @jump.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnJump;
                 @jump.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnJump;
+                @dash.started -= m_Wrapper.m_GameActionsCallbackInterface.OnDash;
+                @dash.performed -= m_Wrapper.m_GameActionsCallbackInterface.OnDash;
+                @dash.canceled -= m_Wrapper.m_GameActionsCallbackInterface.OnDash;
             }
             m_Wrapper.m_GameActionsCallbackInterface = instance;
             if (instance != null)
@@ -225,6 +251,9 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @jump.started += instance.OnJump;
                 @jump.performed += instance.OnJump;
                 @jump.canceled += instance.OnJump;
+                @dash.started += instance.OnDash;
+                @dash.performed += instance.OnDash;
+                @dash.canceled += instance.OnDash;
             }
         }
     }
@@ -233,5 +262,6 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnDash(InputAction.CallbackContext context);
     }
 }

@@ -131,6 +131,19 @@ public class CameraPointController : MonoBehaviour
             newPos.z -= Mathf.Sin(returnToDefaultCameraSizePerSecond * Time.deltaTime) * cameraSizeBounds.x;
         }
 
+        if (newPos.x is <= 0.001f and >= -0.001f)
+        {
+            newPos.x = 0;
+        }
+        if (newPos.y is <= 0.001f and >= -0.001f)
+        {
+            newPos.y = 0;
+        }
+        if (newPos.z <= cameraSizeBounds.x + 0.001f)
+        {
+            newPos.z = cameraSizeBounds.x;
+        }
+
         transform.localPosition = newPos;
     }
 }
