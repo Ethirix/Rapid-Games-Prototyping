@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,6 +6,8 @@ public class CheckpointManager : MonoBehaviour
 {
     [SerializeField] private int initialCheckpoint;
     [SerializeField] private List<Checkpoint> checkpoints;
+
+    public event EventHandler<Checkpoint> OnCheckpointChanged;
 
     private int _checkpointInt;
     private PlayerRespawnManager _respawnManager;
@@ -69,6 +72,9 @@ public class CheckpointManager : MonoBehaviour
         if (checkpointInt != -1)
         {
             _checkpointInt = checkpointInt;
+            OnCheckpointChanged?.Invoke(this, checkpoints[_checkpointInt]);
         }
     }
+
+    public bool IsCheckpointActive(Checkpoint checkpoint) => checkpoints.IndexOf(checkpoint) == _checkpointInt;
 }
