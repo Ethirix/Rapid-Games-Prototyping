@@ -37,8 +37,11 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     private Controls _controls;
     private Animator _animator;
 
-    private float _movementFloat;
     private bool _doDash;
+    private CheckpointManager _checkpointManager;
+    private bool _isGroundedThisFrame;
+
+    public float MovementFloat { get; private set; }
 
     private void Awake()
     {
@@ -57,21 +60,22 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         }
 
         _controls.game.Enable();
+        _checkpointManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<CheckpointManager>();
     }
 
     public void OnMovement(InputAction.CallbackContext context)
     {
-        _movementFloat = context.ReadValue<float>();
+        MovementFloat = context.ReadValue<float>();
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (IsGrounded() && context.performed)
+        if (_isGroundedThisFrame && context.performed)
         {
             _rigidbody.AddRelativeForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             _jumpCount++;
         }
-        else if (!IsGrounded() && _jumpCount > 0 && _jumpCount < maximumJumpCount && context.performed)
+        else if (!_isGroundedThisFrame && _jumpCount > 0 && _jumpCount < maximumJumpCount && context.performed)
         {
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
 
@@ -90,35 +94,44 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
 
     private void FixedUpdate()
     {
-        _animator.SetBool("Grounded", IsGrounded());
+        _isGroundedThisFrame = IsGrounded();
+        _CheckWalls();
+
+        if (_isGroundedThisFrame)
+        {
+            _jumpCount = 0;
+            _dashCount = 0;
+        }
+
+        _animator.SetBool("Grounded", _isGroundedThisFrame);
         _animator.SetFloat("VelocityX", Mathf.Abs(_rigidbody.velocity.x));
         _animator.SetFloat("VelocityY", _rigidbody.velocity.y);
 
         float force = _rigidbody.mass * acceleration;
-         if (Mathf.Abs(_rigidbody.velocity.x) <= maxMovementSpeed && _movementFloat != 0)
+         if (Mathf.Abs(_rigidbody.velocity.x) <= maxMovementSpeed && MovementFloat != 0)
          {
-            _rigidbody.AddForce(new Vector2(force * _movementFloat, 0), ForceMode2D.Force);
+            _rigidbody.AddForce(new Vector2(force * MovementFloat, 0), ForceMode2D.Force);
          }
          else
          {
              switch (_rigidbody.velocity.x)
              {
-                 case < 0 when _movementFloat > 0:
-                 case > 0 when _movementFloat < 0:
-                     _rigidbody.AddForce(new Vector2(force * _movementFloat, 0), ForceMode2D.Force);
+                 case < 0 when MovementFloat > 0:
+                 case > 0 when MovementFloat < 0:
+                     _rigidbody.AddForce(new Vector2(force * MovementFloat, 0), ForceMode2D.Force);
                      break;
              }
          }
 
         switch (_rigidbody.velocity.x)
         {
-            case > 0.1f when _movementFloat == 0:
+            case > 0.1f when MovementFloat == 0:
                 _rigidbody.AddForce(new Vector2(-force / 2, 0));
                 break;
-            case < -0.1f when _movementFloat == 0:
+            case < -0.1f when MovementFloat == 0:
                 _rigidbody.AddForce(new Vector2(force / 2, 0));
                 break;
-            case > -0.1f and < 0.1f when _movementFloat == 0:
+            case > -0.1f and < 0.1f when MovementFloat == 0:
                 _rigidbody.velocity = new Vector2(0, _rigidbody.velocity.y);
                 break;
         }
@@ -134,7 +147,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
                 : new Vector2(0, Physics.gravity.y * normalGravityModifier), ForceMode2D.Impulse);
 
         IsGrounded(out RaycastHit2D raycastHit2D);
-        if (raycastHit2D && _movementFloat != 0 && raycastHit2D.normal.normalized != Vector2.up)
+        if (raycastHit2D && MovementFloat != 0 && raycastHit2D.normal.normalized != Vector2.up)
         {
             _rigidbody.AddForce(new Vector2(-raycastHit2D.normal.x, raycastHit2D.normal.y) * slopeForce,
                 ForceMode2D.Force);
@@ -151,14 +164,6 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
             _animator.SetTrigger("Dash");
             _rigidbody.AddForce(new Vector2(_rigidbody.velocity.normalized.x * dashForce, 0f), ForceMode2D.Impulse);
         }
-    }
-
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        if (!IsGrounded()) return;
-
-        _jumpCount = 0;
-        _dashCount = 0;
     }
 
     private bool IsGrounded()
@@ -179,6 +184,15 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         RaycastHit2D raycastHit2D = Physics2D.Raycast(startPos, Vector2.down, raycastDistance);
 
         Debug.DrawRay(startPos, 10f * raycastDistance * Vector3.down, Color.red, Time.fixedDeltaTime);
+
+        return raycastHit2D;
+    }
+
+    private RaycastHit2D _CheckWalls()
+    {
+        Vector2 startPos = new(transform.position.x + _bounds.extents.x + _collider.offset.x + raycastStartPosition, transform.position.y + _collider.offset.y);
+        RaycastHit2D raycastHit2D = Physics2D.Raycast(startPos, Vector2.right, raycastDistance);
+        Debug.DrawRay(startPos, 10f * raycastDistance * Vector3.right, Color.red, Time.fixedDeltaTime);
 
         return raycastHit2D;
     }

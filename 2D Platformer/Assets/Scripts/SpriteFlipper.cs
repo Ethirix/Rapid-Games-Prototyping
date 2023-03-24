@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class SpriteFlipper : MonoBehaviour
 {
-    [SerializeField] private Rigidbody2D rigidbody;
+    [SerializeField] private PlayerController playerController;
 
     private SpriteRenderer _spriteRenderer;
 
@@ -14,13 +14,13 @@ public class SpriteFlipper : MonoBehaviour
 
     private void Update()
     {
-        if (rigidbody == null)
+        if (playerController == null)
             return;
 
-        _spriteRenderer.flipX = rigidbody.velocity.x switch
+        _spriteRenderer.flipX = playerController.MovementFloat switch
         {
-            > 0.15f => false,
-            < -0.15f => true,
+            > 0 => false,
+            < 0 => true, 
             _ => _spriteRenderer.flipX
         };
     }
