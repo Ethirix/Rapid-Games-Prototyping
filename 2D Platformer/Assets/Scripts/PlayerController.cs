@@ -38,7 +38,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     private Animator _animator;
 
     private bool _doDash;
-    private CheckpointManager _checkpointManager;
+    private GameManager _gameManager;
     private bool _isGroundedThisFrame;
 
     public float MovementFloat { get; private set; }
@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         }
 
         _controls.game.Enable();
-        _checkpointManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<CheckpointManager>();
+        _gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
 
     public void OnMovement(InputAction.CallbackContext context)
@@ -94,6 +94,9 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
 
     private void FixedUpdate()
     {
+        if (_gameManager.GameState != GameState.Playing)
+            return;
+
         _isGroundedThisFrame = IsGrounded();
         _CheckWalls();
 

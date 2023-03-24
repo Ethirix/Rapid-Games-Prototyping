@@ -6,15 +6,17 @@ public class SpriteFlipper : MonoBehaviour
     [SerializeField] private PlayerController playerController;
 
     private SpriteRenderer _spriteRenderer;
+    private GameManager _gameManager;
 
     private void Start()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
 
     private void Update()
     {
-        if (playerController == null)
+        if (_gameManager.GameState != GameState.Playing || playerController == null)
             return;
 
         _spriteRenderer.flipX = playerController.MovementFloat switch

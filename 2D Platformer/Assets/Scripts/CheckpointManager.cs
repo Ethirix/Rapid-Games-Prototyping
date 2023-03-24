@@ -5,31 +5,36 @@ using UnityEngine;
 public class CheckpointManager : MonoBehaviour
 {
     [SerializeField] private int initialCheckpoint;
+    [SerializeField] private int winCheckpoint;
     [SerializeField] private List<Checkpoint> checkpoints;
 
-    public event EventHandler<Checkpoint> OnCheckpointChanged;
+    public event EventHandler<Checkpoint> CheckpointChangedEvent;
+    public event EventHandler WinEvent;
+    public event EventHandler RestartPlayerEvent;
 
     private int _checkpointInt;
-    private PlayerRespawnManager _respawnManager;
+    private GameManager _gameManager;
 
     private void Start()
     {
-        _respawnManager = GetComponent<GameManager>().PlayerRespawnManager;
+        _gameManager = GetComponent<GameManager>();
 
         _checkpointInt = initialCheckpoint;
-        _respawnManager.Respawn += OnRespawnPlayer;
+        _gameManager.PlayerRespawnManager.Respawn += OnRespawnPlayer;
 
         foreach (Checkpoint checkpoint in checkpoints)
         {
             checkpoint.CheckpointHit += OnCheckpointHit;
         }
 
-        _respawnManager.RespawnPlayer();
+        _gameManager.PlayerRespawnManager.RespawnPlayer();
+        _gameManager.CanvasManager.RestartGameEvent += OnRestartGameEvent;
     }
 
     private void OnDisable()
     {
-        _respawnManager.Respawn -= OnRespawnPlayer;
+        _gameManager.PlayerRespawnManager.Respawn -= OnRespawnPlayer;
+        _gameManager.CanvasManager.RestartGameEvent -= OnRestartGameEvent;
         
         foreach (Checkpoint checkpoint in checkpoints)
         {
@@ -69,11 +74,22 @@ public class CheckpointManager : MonoBehaviour
     private void OnCheckpointHit(object sender, Checkpoint checkpoint)
     {
         int checkpointInt = checkpoints.IndexOf(checkpoint);
-        if (checkpointInt != -1)
+        if (checkpointInt == -1) return;
+
+        _checkpointInt = checkpointInt;
+        CheckpointChangedEvent?.Invoke(this, checkpoints[_checkpointInt]);
+
+        if (checkpointInt == winCheckpoint)
         {
-            _checkpointInt = checkpointInt;
-            OnCheckpointChanged?.Invoke(this, checkpoints[_checkpointInt]);
+            WinEvent?.Invoke(this, null);
         }
+    }
+
+    public void OnRestartGameEvent(object sender, EventArgs e)
+    {
+        _checkpointInt = initialCheckpoint;
+        CheckpointChangedEvent?.Invoke(this, checkpoints[_checkpointInt]);
+        RestartPlayerEvent?.Invoke(this, null);
     }
 
     public bool IsCheckpointActive(Checkpoint checkpoint) => checkpoints.IndexOf(checkpoint) == _checkpointInt;

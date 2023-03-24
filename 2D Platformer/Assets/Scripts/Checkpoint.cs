@@ -9,7 +9,7 @@ public class Checkpoint : MonoBehaviour
     public Transform Transform { get; private set; }
     public event EventHandler<Checkpoint> CheckpointHit;
 
-    private CheckpointManager _checkpointManager;
+    private GameManager _gameManager;
     private GameObject _beam;
     private BoxCollider2D _collider;
     private SpriteRenderer _spriteRenderer;
@@ -28,14 +28,14 @@ public class Checkpoint : MonoBehaviour
     private void Start()
     {
         GetComponent<Collider2D>().isTrigger = true;
-        _checkpointManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<CheckpointManager>();
-        _checkpointManager.OnCheckpointChanged += OnCheckpointChanged;
+        _gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
+        _gameManager.CheckpointManager.CheckpointChangedEvent += CheckpointChangedEvent;
         _collider = GetComponent<BoxCollider2D>();
         CreateBeam();
     }
     private void OnDisable()
     {
-        _checkpointManager.OnCheckpointChanged -= OnCheckpointChanged;
+        _gameManager.CheckpointManager.CheckpointChangedEvent -= CheckpointChangedEvent;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -45,7 +45,7 @@ public class Checkpoint : MonoBehaviour
             CheckpointHit?.Invoke(this, this);
         }
     }
-    private void OnCheckpointChanged(object sender, Checkpoint checkpoint)
+    private void CheckpointChangedEvent(object sender, Checkpoint checkpoint)
     {
         _spriteRenderer.color = checkpoint == this ? new Color(0, 255, 150) : Color.red;
     }
@@ -64,6 +64,6 @@ public class Checkpoint : MonoBehaviour
         _spriteRenderer = _beam.AddComponent<SpriteRenderer>();
         _spriteRenderer.sprite = sprite;
 
-        _spriteRenderer.color = _checkpointManager.IsCheckpointActive(this) ? new Color(0, 255, 150) : Color.red;
+        _spriteRenderer.color = _gameManager.CheckpointManager.IsCheckpointActive(this) ? new Color(0, 255, 150) : Color.red;
     }
 }
