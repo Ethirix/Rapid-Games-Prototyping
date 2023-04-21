@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -36,6 +35,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     private Rigidbody2D _rigidbody;
     private Controls _controls;
     private Animator _animator;
+    private SpriteRenderer _spriteRenderer;
 
     private bool _doDash;
     private GameManager _gameManager;
@@ -49,6 +49,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         _bounds = _collider.bounds;
         _rigidbody = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        _spriteRenderer = transform.Find("CharacterSprite").GetComponent<SpriteRenderer>();
     }
 
     private void Start()
@@ -98,7 +99,7 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
             return;
 
         _isGroundedThisFrame = IsGrounded();
-        _CheckWalls();
+        RaycastHit2D wallCheck = _CheckWalls();
 
         if (_isGroundedThisFrame)
         {
@@ -111,28 +112,30 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         _animator.SetFloat("VelocityY", _rigidbody.velocity.y);
 
         float force = _rigidbody.mass * acceleration;
-         if (Mathf.Abs(_rigidbody.velocity.x) <= maxMovementSpeed && MovementFloat != 0)
-         {
-            _rigidbody.AddForce(new Vector2(force * MovementFloat, 0), ForceMode2D.Force);
-         }
-         else
-         {
-             switch (_rigidbody.velocity.x)
-             {
-                 case < 0 when MovementFloat > 0:
-                 case > 0 when MovementFloat < 0:
-                     _rigidbody.AddForce(new Vector2(force * MovementFloat, 0), ForceMode2D.Force);
-                     break;
-             }
-         }
+        Vector2 finalForce = Vector2.zero;
+
+        if (Mathf.Abs(_rigidbody.velocity.x) <= maxMovementSpeed && MovementFloat != 0)
+        { 
+            finalForce += new Vector2(force * MovementFloat, 0);
+        }
+        else
+        {
+            switch (_rigidbody.velocity.x)
+            {
+                case < 0 when MovementFloat > 0:
+                case > 0 when MovementFloat < 0:
+                    finalForce += new Vector2(force * MovementFloat, 0);
+                    break;
+            }
+        }
 
         switch (_rigidbody.velocity.x)
         {
             case > 0.1f when MovementFloat == 0:
-                _rigidbody.AddForce(new Vector2(-force / 2, 0));
+                finalForce += new Vector2(-force / 2, 0);
                 break;
             case < -0.1f when MovementFloat == 0:
-                _rigidbody.AddForce(new Vector2(force / 2, 0));
+                finalForce += new Vector2(force / 2, 0);
                 break;
             case > -0.1f and < 0.1f when MovementFloat == 0:
                 _rigidbody.velocity = new Vector2(0, _rigidbody.velocity.y);
@@ -152,13 +155,16 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         IsGrounded(out RaycastHit2D raycastHit2D);
         if (raycastHit2D && MovementFloat != 0 && raycastHit2D.normal.normalized != Vector2.up)
         {
-            _rigidbody.AddForce(new Vector2(-raycastHit2D.normal.x, raycastHit2D.normal.y) * slopeForce,
-                ForceMode2D.Force);
+            finalForce += new Vector2(-raycastHit2D.normal.x, raycastHit2D.normal.y) * slopeForce;
             Debug.DrawLine(transform.position - raycastHit2D.collider.gameObject.transform.position,
                 transform.position - new Vector3(-raycastHit2D.normal.x, raycastHit2D.normal.y, 0), Color.green,
                 Time.fixedDeltaTime);
         }
 
+        if (!wallCheck.collider || wallCheck.collider.isTrigger)
+        {
+            _rigidbody.AddForce(finalForce, ForceMode2D.Force);
+        }
 
         if (_doDash && Mathf.Abs(_rigidbody.velocity.x) > 0.1f && _dashCount < maximumDashCount)
         {
@@ -193,9 +199,21 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
 
     private RaycastHit2D _CheckWalls()
     {
-        Vector2 startPos = new(transform.position.x + _bounds.extents.x + _collider.offset.x + raycastStartPosition, transform.position.y + _collider.offset.y);
-        RaycastHit2D raycastHit2D = Physics2D.Raycast(startPos, Vector2.right, raycastDistance);
-        Debug.DrawRay(startPos, 10f * raycastDistance * Vector3.right, Color.red, Time.fixedDeltaTime);
+        int rayDirection = _spriteRenderer.flipX switch
+        {
+            true => -1,
+            false => 1
+        };
+
+        Vector2 startPos = new(transform.position.x + rayDirection * _bounds.extents.x + rayDirection * _collider.offset.x + raycastStartPosition, transform.position.y + _collider.offset.y);
+        Vector2 direction = _spriteRenderer.flipX switch
+        {
+            true => Vector2.left,
+            false => Vector2.right
+        };
+
+        RaycastHit2D raycastHit2D = Physics2D.Raycast(startPos, direction, raycastDistance);
+        Debug.DrawRay(startPos, 10f * raycastDistance * direction, Color.red, Time.fixedDeltaTime);
 
         return raycastHit2D;
     }
