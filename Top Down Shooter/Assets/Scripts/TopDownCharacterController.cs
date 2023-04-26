@@ -6,6 +6,8 @@ public class TopDownCharacterController : MonoBehaviour
     [Header("Required GameObjects")] 
     [SerializeField]
     private new Camera camera;
+    [SerializeField]
+    private GameObject flashlight;
 
     [Header("Movement parameters")]
     [SerializeField] 
@@ -30,6 +32,8 @@ public class TopDownCharacterController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 mousePos = camera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - transform.position;
+
+        flashlight.transform.rotation = Quaternion.Euler(flashlight.transform.rotation.x, flashlight.transform.rotation.y, -Quaternion.LookRotation(mousePos, Vector3.forward).eulerAngles.z);
 
         _animator.SetFloat(_horizontal, mousePos.x);
         _animator.SetFloat(_vertical, mousePos.y);
