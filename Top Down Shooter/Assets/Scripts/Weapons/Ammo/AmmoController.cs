@@ -14,6 +14,7 @@ namespace Weapons.Ammo
             _rigidbody.gravityScale = 0;
             _rigidbody.freezeRotation = true;
             _rigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            transform.parent = null;
         }
 
         private void FixedUpdate()

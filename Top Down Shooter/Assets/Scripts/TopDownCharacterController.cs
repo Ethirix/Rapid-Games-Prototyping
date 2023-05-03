@@ -62,7 +62,7 @@ public class TopDownCharacterController : MonoBehaviour
     {
         if (context.performed)
         {
-            _weaponController.Shoot(flashlight.transform, transform);
+            _weaponController.Shoot(flashlight.transform, flashlight.transform);
         } 
         else if (context.canceled)
         {

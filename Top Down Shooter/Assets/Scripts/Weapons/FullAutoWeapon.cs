@@ -43,7 +43,7 @@ namespace Weapons
 
                 if (weaponData.RoundsPerTriggerPull <= 0)
                 {
-                    RunShoot(shotRotation, shotPosition);
+                    StartCoroutine(RunShoot(shotRotation, shotPosition));
                     yield return RunShotCooldown();
                 }
                 else
@@ -52,8 +52,7 @@ namespace Weapons
                     {
                         if (magazineAmmoCount == 0)
                             break;
-
-                        RunShoot(shotRotation, shotPosition);
+                        StartCoroutine(RunShoot(shotRotation, shotPosition));
                         yield return RunShotCooldown();
                     }
 
@@ -66,7 +65,7 @@ namespace Weapons
             blockShooting = false;
         }
 
-        private void RunShoot(Transform shotRotation, Transform shotPosition)
+        private IEnumerator RunShoot(Transform shotRotation, Transform shotPosition)
         {
             magazineAmmoCount--;
 
@@ -79,10 +78,12 @@ namespace Weapons
                 bullet.transform.parent = shotPosition;
                 bullet.transform.tag = "Bullet";
                 bullet.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, shotRotation.rotation.eulerAngles.z));
-                bullet.transform.localPosition = new Vector3(0, 1, -1);
+                bullet.transform.localPosition = new Vector3(0, 1.1f, -1);
                 bullet.AddComponent<AmmoController>().StartBullet(ammoData);
-                Debug.Break();
+                //Debug.Break();
             }
+
+            yield return null;
         }
 
         protected override IEnumerator RunShotCooldown()
