@@ -2,18 +2,24 @@ using UnityEngine;
 
 namespace Weapons.Ammo
 {
+    [RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D), typeof(Rigidbody2D))]
     public class AmmoController : MonoBehaviour
     {
         private AmmoData _data;
         private Rigidbody2D _rigidbody;
+        private SpriteRenderer _spriteRenderer;
 
         public void StartBullet(AmmoData data)
         {
             _data = data;
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _spriteRenderer.sprite = _data.ProjectileSprite;
+
             _rigidbody = GetComponent<Rigidbody2D>();
             _rigidbody.gravityScale = 0;
             _rigidbody.freezeRotation = true;
             _rigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
             transform.parent = null;
         }
 
@@ -24,15 +30,13 @@ namespace Weapons.Ammo
 
         private void OnCollisionEnter2D(Collision2D other)
         {
-            if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("Player"))
-            {
-                //TODO: Damage Code dependant on HealthController
-            }
+            if (other.gameObject.TryGetComponent(out AmmoController _))
+                return;
 
-            if (!other.gameObject.CompareTag("Bullet"))
-            {
-                Destroy(gameObject);
-            }
+            other.gameObject.TryGetComponent(out IHealth health);
+            health?.RemoveHealth(_data.ProjectileDamage);
+
+            Destroy(gameObject);
         }
     }
 }
