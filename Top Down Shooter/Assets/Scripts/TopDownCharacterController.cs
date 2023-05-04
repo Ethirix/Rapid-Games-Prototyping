@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Weapons;
 
+[RequireComponent(typeof(WeaponController), typeof(Rigidbody2D), typeof(Animator))]
 public class TopDownCharacterController : MonoBehaviour
 {
     [Header("Required GameObjects")] 
@@ -15,8 +17,10 @@ public class TopDownCharacterController : MonoBehaviour
 
     private Animator _animator;
     private Rigidbody2D _rb;
+    private WeaponController _weaponController;
 
     private Vector2 _playerDirection;
+    private Vector3 _mousePos;
     private float _playerSpeed = 1f;
 
     private readonly int _speed = Animator.StringToHash("Speed");
@@ -27,26 +31,43 @@ public class TopDownCharacterController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        _weaponController = GetComponent<WeaponController>();
     }
 
     private void FixedUpdate()
     {
-        Vector3 mousePos = camera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - transform.position;
+        _mousePos = camera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - transform.position;
+        
+        Quaternion rotation = flashlight.transform.rotation;
+        rotation = Quaternion.Euler(rotation.x, rotation.y, -Quaternion.LookRotation(_mousePos, Vector3.forward).eulerAngles.z);
+        flashlight.transform.rotation = rotation;
 
-        flashlight.transform.rotation = Quaternion.Euler(flashlight.transform.rotation.x, flashlight.transform.rotation.y, -Quaternion.LookRotation(mousePos, Vector3.forward).eulerAngles.z);
-
-        _animator.SetFloat(_horizontal, mousePos.x);
-        _animator.SetFloat(_vertical, mousePos.y);
+        _animator.SetFloat(_horizontal, _mousePos.x);
+        _animator.SetFloat(_vertical, _mousePos.y);
 
         _rb.velocity = _playerDirection * (_playerSpeed * playerMaxSpeed * Time.fixedDeltaTime);
     }
 
-    public void OnPlayerInputShoot(InputAction.CallbackContext context)
+    public void OnPlayerInputReload(InputAction.CallbackContext context)
     {
         if (!context.performed)
             return;
 
-        Debug.Log($"Shoot! {Time.time}", gameObject);
+        _weaponController.Reload();
+
+        Debug.Log($"Reload - {Time.time}", gameObject);
+    }
+
+    public void OnPlayerInputShoot(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            _weaponController.Shoot(flashlight.transform, flashlight.transform);
+        } 
+        else if (context.canceled)
+        {
+            _weaponController.StopShooting();
+        }
     }
 
     public void OnPlayerInputMove(InputAction.CallbackContext context)
