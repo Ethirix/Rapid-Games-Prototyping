@@ -71,16 +71,14 @@ namespace Weapons
 
             for (int i = 0; i < ammoData.ProjectileCount; i++)
             {
-                GameObject bullet = new();
-                bullet.AddComponent<SpriteRenderer>().sprite = ammoData.ProjectileSprite;
-                bullet.AddComponent<BoxCollider2D>();
-                bullet.AddComponent<Rigidbody2D>();
-                bullet.transform.parent = shotPosition;
-                bullet.transform.tag = "Bullet";
+                GameObject bullet = new()
+                {
+                    transform = { parent = shotPosition },
+                    name = "Bullet"
+                };
                 bullet.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, shotRotation.rotation.eulerAngles.z));
                 bullet.transform.localPosition = new Vector3(0, 1.1f, -1);
                 bullet.AddComponent<AmmoController>().StartBullet(ammoData);
-                //Debug.Break();
             }
 
             yield return null;
