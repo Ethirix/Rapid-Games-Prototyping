@@ -19,6 +19,8 @@ public class TopDownCharacterController : MonoBehaviour
     private Rigidbody2D _rb;
     private WeaponController _weaponController;
 
+    private int _currentWeapon;
+
     private Vector2 _playerDirection;
     private Vector3 _mousePos;
     private float _playerSpeed = 1f;
@@ -89,5 +91,31 @@ public class TopDownCharacterController : MonoBehaviour
         _animator.SetFloat(_speed, _playerDirection.magnitude);
 
         _playerSpeed = 1f;
+    }
+
+    public void OnPlayerInputSwitchWeapons(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        int val = (int)context.ReadValue<float>();
+
+        switch (val)
+        {
+            case > 0:
+            {
+                if (_currentWeapon < _weaponController.GetWeaponsSize() - 1)
+                    _currentWeapon++;
+                break;
+            }
+            case < 0:
+            {
+                if (_currentWeapon > 0)
+                    _currentWeapon--;
+                break;
+            }
+        }
+
+        _weaponController.EquipWeapon(_currentWeapon);
     }
 }

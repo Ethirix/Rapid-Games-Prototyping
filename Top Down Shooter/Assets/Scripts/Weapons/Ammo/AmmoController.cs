@@ -1,8 +1,9 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Weapons.Ammo
 {
-    [RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D), typeof(Rigidbody2D))]
+    [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D))]
     public class AmmoController : MonoBehaviour
     {
         private AmmoData _data;
@@ -19,6 +20,8 @@ namespace Weapons.Ammo
             _rigidbody.gravityScale = 0;
             _rigidbody.freezeRotation = true;
             _rigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            transform.AddComponent<BoxCollider2D>();
 
             transform.parent = null;
         }

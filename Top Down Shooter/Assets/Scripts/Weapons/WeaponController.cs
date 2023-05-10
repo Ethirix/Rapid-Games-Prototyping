@@ -88,5 +88,15 @@ namespace Weapons
         {
             return weapons[_weapon];
         }
+
+        public int GetCurrentWeaponInt()
+        {
+            return _weapon;
+        }
+
+        public int GetWeaponsSize()
+        {
+            return weapons.Count;
+        }
     }
 }
