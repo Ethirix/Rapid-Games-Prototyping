@@ -67,6 +67,19 @@ namespace Enemies
             _canDamage = true;
         }
 
+        private IEnumerator RunDead()
+        {
+            float time = 0;
+
+            while (time < 5)
+            {
+                time += Time.fixedDeltaTime;
+                yield return new WaitForFixedUpdate();
+            }
+
+            Destroy(gameObject);
+        }
+
         private void OnCollisionEnter2D(Collision2D other)
         {
             if (other.gameObject.CompareTag("Player") && _canDamage)
@@ -118,7 +131,7 @@ namespace Enemies
                 _rigidbody.simulated = false;
                 if (deadSprite)
                     GetComponent<SpriteRenderer>().sprite = deadSprite;
-                enabled = false;
+                StartCoroutine(RunDead());
             }
 
             HealthChangedEvent?.Invoke(this, EventArgs.Empty);
