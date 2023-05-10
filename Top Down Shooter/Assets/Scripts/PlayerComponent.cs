@@ -1,6 +1,7 @@
 using System;
 using Assets.Scripts;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerComponent : MonoBehaviour, IEntity
 {
@@ -52,6 +53,7 @@ public class PlayerComponent : MonoBehaviour, IEntity
         {
             Health = 0;
             IsAlive = false;
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
         }
 
         HealthChangedEvent?.Invoke(this, EventArgs.Empty);

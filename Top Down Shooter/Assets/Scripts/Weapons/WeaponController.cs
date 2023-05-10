@@ -77,6 +77,7 @@ namespace Weapons
         {
             if (weapon < weapons.Count)
             {
+                weapons[_weapon].EndShooting();
                 _weapon = weapon;
                 return true;
             }
