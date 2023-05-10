@@ -1,10 +1,16 @@
-using System;
+using System.Collections.Generic;
+using System.Linq;
+using Assets.Scripts;
 using UnityEngine;
 
 namespace Enemies
 {
     public class EnemySpawnerTrigger : MonoBehaviour
     {
+        [SerializeField] private Vector2 spawnOffset = new(0, 8f);
+
+        [SerializeField] private List<GameObject> enemiesToSpawn = new();
+
         private Transform _spawnPoint;
         private bool _triggered;
 
@@ -15,14 +21,18 @@ namespace Enemies
                 Reset();
 
             _spawnPoint = transform.Find("SpawnPoint");
+            _spawnPoint.transform.localPosition = spawnOffset;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.CompareTag("Player") && !_triggered)
+            if (!other.CompareTag("Player") || _triggered) return;
+
+            _triggered = true;
+            foreach (var enemy in enemiesToSpawn.Select(enemyToSpawn => Instantiate(enemyToSpawn, transform)))
             {
-                _triggered = true;
-                new GameObject("lol", typeof(Transform)).transform.position = _spawnPoint.position;
+                enemy.transform.localPosition = new Vector3(spawnOffset.x, spawnOffset.y, -1f);
+                enemy.transform.parent = null;
             }
         }
 
@@ -33,7 +43,7 @@ namespace Enemies
                 transform =
                 {
                     parent = transform,
-                    localPosition = new Vector3(0, 8, 0)
+                    localPosition = new Vector3(spawnOffset.x, spawnOffset.y, 0)
                 }
             };
         }

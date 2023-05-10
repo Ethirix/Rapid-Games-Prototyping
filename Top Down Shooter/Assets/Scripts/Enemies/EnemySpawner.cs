@@ -1,13 +1,9 @@
-using System;
-using Enemies;
 using UnityEngine;
 
 namespace Enemies
 {
     public class EnemySpawner : MonoBehaviour
     {
-        public EventHandler OnTriggerEntered;
-
         private EnemySpawnerTrigger _trigger;
 
         private void Start()
@@ -23,7 +19,7 @@ namespace Enemies
 
         private void Reset()
         {
-            GameObject trigger = new("Trigger", typeof(BoxCollider2D))
+            GameObject trigger = new("Trigger", typeof(BoxCollider2D), typeof(EnemySpawnerTrigger))
             {
                 transform =
                 {
@@ -32,7 +28,6 @@ namespace Enemies
                 }
             };
             trigger.GetComponent<BoxCollider2D>().isTrigger = true;
-            trigger.AddComponent<EnemySpawnerTrigger>();
         }
     }
 }
