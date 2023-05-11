@@ -27,6 +27,10 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
      Tooltip("From the base of the sprite, in World units, the starting position of the Raycast for the floor.")]
     private float raycastStartPosition;
 
+    [Header("Shoot Settings")] 
+    [SerializeField] private float shotCooldown = 5f;
+    [SerializeField] private GameObject bulletPrefab;
+
     private int _jumpCount;
     private int _dashCount;
 
@@ -40,6 +44,8 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
     private bool _doDash;
     private GameManager _gameManager;
     private bool _isGroundedThisFrame;
+
+    private float _shotCooldownTimer;
 
     public float MovementFloat { get; private set; }
 
@@ -93,10 +99,45 @@ public class PlayerController : MonoBehaviour, Controls.IGameActions
         }
     }
 
+    public void OnShoot(InputAction.CallbackContext context)
+    {
+        if (context.performed && _shotCooldownTimer == 0f)
+        {
+            _shotCooldownTimer += Time.fixedDeltaTime;
+            bool flipX = _spriteRenderer.flipX;
+            Vector2 direction = flipX switch
+            {
+                true => Vector2.left,
+                false => Vector2.right
+            };
+
+            Vector3 thisPos = transform.position;
+            Vector3 position = flipX switch
+            {
+                true => new Vector3(thisPos.x - 2f, thisPos.y - 0.5f, thisPos.z),
+                false => new Vector3(thisPos.x + 2f, thisPos.y - 0.5f, thisPos.z)
+            };
+
+            GameObject bullet = Instantiate(bulletPrefab, position, Quaternion.Euler(0,0,0));
+
+            bullet.GetComponent<BulletScript>().PassDirection(direction);
+        }
+    }
+
+    public void OnRestart(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+            _gameManager.PlayerRespawnManager.RespawnPlayer();
+    }
+
     private void FixedUpdate()
     {
         if (_gameManager.GameState != GameState.Playing)
             return;
+        if (_shotCooldownTimer != 0f)
+            _shotCooldownTimer += Time.fixedDeltaTime;
+        if (_shotCooldownTimer >= shotCooldown)
+            _shotCooldownTimer = 0f;
 
         _isGroundedThisFrame = IsGrounded();
         RaycastHit2D wallCheck = _CheckWalls();
